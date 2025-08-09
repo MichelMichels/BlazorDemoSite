@@ -1,0 +1,145 @@
+﻿@page "/projects/vies"
+
+@using System.Diagnostics
+@using MichelMichels.ViesSharp;
+@using MichelMichels.ViesSharp.Exceptions
+@using MichelMichels.ViesSharp.Models
+@using BlazorDemoSite
+@using System.Text.Json
+
+<PageTitle>@projectName | @Constants.DomainName</PageTitle>
+
+<div class="container p-4 ">
+    <div class="vstack gap-3">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="/">Home</a></li>
+                <li class="breadcrumb-item"><a href="/projects">Projects</a></li>
+                <li class="breadcrumb-item active" aria-current="page">ViesSharp</li>
+            </ol>
+        </nav>
+
+        <div class="d-flex align-items-center gap-3">
+            <h2 class="display-3">@projectName 🛂</h2>
+
+            <a href="@githubUrl" target="_blank" class="btn btn-outline-primary" role="button">
+                <div class="hstack gap-2">
+                    <i class="bi-github" />
+                    <span class="d-none d-sm-block">Repository</span>
+                </div>
+            </a>
+        </div>
+
+        <h3>Introduction</h3>
+
+        <p>
+            This page contains a demo of the <a href="@nugetUrl"><code>MichelMichels.@projectName</code></a> C# library written by Michel
+            Michels. It utilizes the REST API that the European Commission has made freely available. Before using this 
+            demo or the library, make sure to read 
+            <a href="https://ec.europa.eu/taxation_customs/vies/#/disclaimer" target="_blank">the disclaimer over at their site</a>. 
+        </p>
+
+        <p>
+            None of the input on this site is saved. If you want to be sure, you can check out the code of my website over 
+            at <a href="@Constants.SiteGitHubUrl" target="_blank">git.miche.ls/site</a>.
+        </p>
+
+        <h3>Usage</h3>
+
+        <p>Pick a country code from the dropdown list below and fill in a VAT number. The number needs no particular formatting.</p>
+
+        <hr />
+
+        <!-- Search -->
+        <div class="d-flex">
+            <form @onsubmit="Lookup" class="flex-fill align-self-center">
+                <h3 class="mb-3">Demo</h3>
+
+                <div class="d-flex flex-column flex-md-row gap-2">
+                    <div class="form-floating" style="width: 7rem;">
+                        <select class="form-select" id="country-select" placeholder="Country placeholder" @bind="@SelectedCountryCode" required>
+                            <option disabled value="" selected>...</option>
+                            @foreach (string countryCode in CountryCodes)
+                            {
+                                <option value="@countryCode">@countryCode</option>
+                            }
+                        </select>
+                        <label for="country-select">Country</label>
+                    </div>
+
+                    <div class="form-floating flex-grow-1">
+                        <input type="text" class="form-control" id="vatnumber-input" placeholder="VAT no. placeholder" @bind="@VatNumber" required>
+                        <label for="vatnumber-input">VAT no.</label>
+                    </div>
+
+                    <button class="btn btn-primary" type="submit">
+                        <span class="@(IsLookingUp ? "d-none" : "")">Lookup</span>
+                        <div class="spinner-border spinner-border-sm @(!IsLookingUp ? "d-none" : "")" role="status">
+                            <span class="visually-hidden">Looking up...</span>
+                        </div>
+                    </button>
+                </div>                    
+            </form>
+        </div>
+
+        <!-- Result -->
+        <div>
+            <h3>Result</h3>
+
+            @if(LastResponse is not null)
+            {
+                <div class="card @(BackgroundClass) bg-opacity-25">
+                    <div class="card-body">
+                        <i class="@(LastResponse.IsValid ? "bi-check-circle-fill text-success" : "bi-x-circle-fill text-danger") d-block text-center mb-2" style="font-size: 4rem;"></i>
+
+                        @if(LastResponse.IsValid) {
+                            <h4 class="text-center">@ParsedCompanyName</h4>
+                            <p class="text-center">@ParsedAddress</p>
+                        } else {
+                            <h3 class="text-center">This is not a valid VAT number.</h3>
+                        }
+
+                        <a data-bs-toggle="collapse" href="#collapse-json" role="button" aria-expanded="false" aria-controls="collapse-json">See json</a>
+
+                        <div class="collapse" id="collapse-json">
+                            <pre><code>@(JsonSerializer.Serialize(LastResponse, defaultSerializerOptions))</code></pre>
+                        </div>
+                    </div>
+                </div>
+            } else
+            {
+                <div class="pa-4">
+                    <i class="bi-search text-center d-block" style="font-size: 4rem; color:gray;" />
+                    <p style="color:gray;" class="text-center">Lookup a VAT number!</p>
+                </div>
+            }
+
+        </div>
+
+        <!-- History -->
+        <div class="@(History.Count == 0 ? "d-none" : "")">
+            <h3>History</h3>
+
+            <div class="accordion" id="accordion-history">                    
+
+                @for (int i = 0; i < History.Count; i++)
+                {
+                    VatNumberResponse response = History[i];
+
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-@(i)">
+                                @(response.Name)
+                            </button>
+                        </h2>
+                        <div id="collapse-@(i)" class="accordion-collapse collapse" data-bs-parent="#accordion-history">
+                            <div class="accordion-body">
+                                <pre><code>@(JsonSerializer.Serialize(response, defaultSerializerOptions))</code></pre>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,7 +1,72 @@
 ﻿@page "/"
 
-<PageTitle>Home</PageTitle>
+@using BlazorDemoSite.Models
+@using BlazorDemoSite
 
-<h1>Hello, world!</h1>
+<PageTitle>Home | @(Constants.DomainName)</PageTitle>
 
-Welcome to your new app.
+<div class="container vstack p-4 gap-4">
+    <div class="d-flex flex-column flex-md-row gap-4 justify-content-center align-items-center py-4">
+        <img src="img/me.webp" width="128" height="128" alt="Profile picture" />
+
+        <div class="text-center text-md-start align-self-center">
+            <p class="fs-1 fw-light mb-1">
+                Hi, I'm <span class="fw-normal">
+                    @foreach (char c in Name)
+                    {
+                        <span class="name-char fw-bold @(GetRandomColorClass())">@c</span>
+                    }
+                </span>.
+            </p>
+
+            <a href="projects" class="btn btn-outline-primary m-auto" aria-label="Go to my projects page">See projects</a>
+        </div>              
+    </div>
+
+    <div class="row justify-content-center mb-3">
+        <div class="p-4 bg-body-tertiary rounded col col-md-8">
+            <h2>Biography</h2>
+
+            <figure class="m-0">
+                <blockquote class="blockquote m-0">
+                    <p>
+                        Michel Michels, the C# maestro, writes code so clean, even his debugger gets bored. His love for C# is so deep,
+                        he’s been known to serenade his computer with ballads of binary and declarations of variables. In the
+                        open source community, Michel’s contributions are like hidden Easter eggs in a video game, eagerly awaited
+                        and celebrated.
+                    </p>
+
+                    <p>
+                        When not architecting elegant code, Michel can be found in his workshop, turning wood into ‘woodenware’
+                        with the same precision he reserves for his semicolons. His musical talents don’t just stop at coding
+                        symphonies; they’re the secret ingredient to his legendary party playlists.
+                    </p>
+
+                    <p>
+                        Michel’s life motto? “In code we trust, all others must bring data.” Whether he’s debugging or deejaying,
+                        woodworking or woogie-boogieing, Michel’s approach is the same: Why do it normally when you can add a
+                        semicolon of style and a curly brace of flair?
+                    </p>
+                </blockquote>
+                <figcaption class="blockquote-footer m-0">
+                    Microsoft Copilot
+                </figcaption>
+            </figure>
+        </div>
+    </div>
+
+    <div>
+        <h3>Contact</h3>
+
+        <div class="row g-3">
+            @foreach(ContactData data in ContactOptions) {
+                <div class="col-md-4">
+                    <a href="@data.Link" type="button" class="btn btn-outline-secondary w-100 py-3" target="_blank">
+                        <i class="@data.IconClass" style="font-size: 5rem;" />
+                    </a>
+                </div>
+            }            
+        </div>
+        
+    </div>
+</div>
